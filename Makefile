@@ -8,7 +8,7 @@ SPECS := \
 	tests/diff_spec.lua \
 	tests/terminal_spec.lua
 
-.PHONY: test test-% help
+.PHONY: test test-% integration help
 
 ## Run the full test suite
 test:
@@ -18,6 +18,10 @@ test:
 			-c "lua require('plenary.busted').run('$$spec')" \
 			-c "qa!" 2>&1; \
 	done
+
+## Launch the interactive integration demo (opens Neovim with mock CLI)
+integration:
+	@bash tests/run_integration.sh
 
 ## Run a single spec file, e.g.: make test-terminal
 test-%:
@@ -34,6 +38,7 @@ help:
 	@echo "  make test-context    Run tests/context_spec.lua"
 	@echo "  make test-discovery  Run tests/discovery_spec.lua"
 	@echo "  make test-diff       Run tests/diff_spec.lua"
+	@echo "  make integration     Launch interactive integration demo"
 	@echo ""
 	@echo "Overrides:"
 	@echo "  PLENARY=/path/to/plenary.nvim  (default: $(PLENARY))"
