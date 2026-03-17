@@ -64,12 +64,15 @@ function M.open(file_path, new_content)
 
   -- Open the diff windows
   vim.schedule(function()
-    -- Ensure original file is visible in current window
+    local split_cmd = opts.vertical_split and "vsplit" or "split"
+
+    -- Open a NEW split for the original file so the current window
+    -- (e.g. the terminal/chat) is left untouched.
+    vim.cmd(split_cmd)
     vim.api.nvim_set_current_buf(orig_bufnr)
     vim.cmd("diffthis")
 
-    -- Open the proposed buffer in a split
-    local split_cmd = opts.vertical_split and "vsplit" or "split"
+    -- Open the proposed buffer in a second split beside the original
     vim.cmd(split_cmd)
     vim.api.nvim_set_current_buf(proposed_bufnr)
     vim.cmd("diffthis")
