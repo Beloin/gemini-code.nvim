@@ -47,14 +47,18 @@ end
 --- Build the shell command string that launches the CLI.
 -- Prepends environment variable assignments so they're visible to the process
 -- regardless of shell.
+-- @param args string|nil  Optional arguments to pass to the CLI (e.g. "--approval-mode=auto_edit")
 -- @return string
-local function build_cmd()
+local function build_cmd(args)
   local env  = build_env()
   local env_prefix = ""
   for k, v in pairs(env) do
     env_prefix = env_prefix .. k .. "=" .. v .. " "
   end
   local cmd = config.terminal_cmd or "gemini"
+  if args and args ~= "" then
+    cmd = cmd .. " " .. args
+  end
   return env_prefix .. cmd
 end
 
@@ -78,9 +82,10 @@ local function open_split()
 end
 
 --- Open the terminal using the native :terminal provider.
-local function open_native()
+-- @param args string|nil  Optional CLI arguments
+local function open_native(args)
   open_split()
-  local cmd = build_cmd()
+  local cmd = build_cmd(args)
   vim.cmd("terminal " .. cmd)
 
   term_bufnr = vim.api.nvim_get_current_buf()
@@ -111,9 +116,10 @@ local function open_native()
 end
 
 --- Open the terminal using snacks.nvim.
-local function open_snacks()
+-- @param args string|nil  Optional CLI arguments
+local function open_snacks(args)
   local snacks = require("snacks")
-  local cmd    = build_cmd()
+  local cmd    = build_cmd(args)
 
   -- snacks.terminal.open() creates or toggles a terminal
   snacks.terminal.open(cmd, {
@@ -176,7 +182,8 @@ end
 -- If closed: open it and spawn `gemini`.
 -- If open and focused: hide it.
 -- If open but not focused: focus it.
-function M.toggle()
+-- @param args string|nil  Optional CLI arguments (e.g. "--approval-mode=auto_edit")
+function M.toggle(args)
   -- Case 1: no terminal yet → spawn it
   if not term_bufnr or not vim.api.nvim_buf_is_valid(term_bufnr) then
     term_bufnr = nil
@@ -184,9 +191,9 @@ function M.toggle()
 
     local provider = (config.terminal and config.terminal.provider) or "auto"
     if provider == "snacks" or (provider == "auto" and has_snacks()) then
-      open_snacks()
+      open_snacks(args)
     else
-      open_native()
+      open_native(args)
     end
     return
   end

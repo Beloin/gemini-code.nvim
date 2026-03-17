@@ -96,8 +96,15 @@ function M.stop()
 end
 
 --- Toggle the Gemini CLI terminal.
-function M.toggle_terminal()
-  require("geminicode.terminal").toggle()
+-- @param args string|nil  Optional CLI arguments
+function M.toggle_terminal(args)
+  require("geminicode.terminal").toggle(args)
+end
+
+--- Toggle the Gemini CLI terminal with auto-edit mode enabled.
+-- Passes --approval-mode=auto_edit to the CLI (skips diff approval).
+function M.toggle_terminal_auto_edit()
+  require("geminicode.terminal").toggle("--approval-mode=auto_edit")
 end
 
 --- Focus (or open) the Gemini CLI terminal.

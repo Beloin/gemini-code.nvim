@@ -25,6 +25,14 @@ end, {
   desc = "Toggle Gemini CLI terminal",
 })
 
+--- Toggle the Gemini CLI terminal with auto-edit mode (--approval-mode=auto_edit)
+-- Skips diff approval for automatic changes
+vim.api.nvim_create_user_command("GeminiCodeAutoEdit", function()
+  require("geminicode").toggle_terminal_auto_edit()
+end, {
+  desc = "Toggle Gemini CLI with auto-edit mode (skips diff approval)",
+})
+
 --- Smart focus: open if not running, focus if open but not active, hide if active
 vim.api.nvim_create_user_command("GeminiCodeFocus", function()
   require("geminicode").focus_terminal()
