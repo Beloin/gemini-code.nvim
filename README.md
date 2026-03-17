@@ -36,6 +36,25 @@ Google's official [IDE Companion Spec](https://geminicli.com/docs/ide-integratio
 
 ## Installation
 
+### LazyVim
+
+Create `~/.config/nvim/lua/plugins/gemini-code.lua`:
+
+```lua
+return {
+  "beloin/gemini-code.nvim",
+  event = "VeryLazy",
+  opts = {},
+  keys = {
+    { "<leader>gg", "<cmd>GeminiCode<cr>",         desc = "Toggle Gemini CLI" },
+    { "<leader>ga", "<cmd>GeminiCodeAutoEdit<cr>", desc = "Toggle Gemini CLI (auto-edit)" },
+    { "<leader>gf", "<cmd>GeminiCodeFocus<cr>",    desc = "Focus Gemini CLI" },
+    { "<leader>da", "<cmd>GeminiCodeDiffAccept<cr>", desc = "Accept Gemini diff" },
+    { "<leader>dr", "<cmd>GeminiCodeDiffDeny<cr>",   desc = "Reject Gemini diff" },
+  },
+}
+```
+
 ### lazy.nvim
 
 ```lua
@@ -112,6 +131,7 @@ require("geminicode").setup({
 | Command | Description |
 |---|---|
 | `:GeminiCode` | Toggle the Gemini CLI terminal |
+| `:GeminiCodeAutoEdit` | Toggle Gemini CLI with `--approval-mode=auto_edit` (skips diff approval) |
 | `:GeminiCodeFocus` | Focus (or open) the terminal |
 | `:GeminiCodeAdd [path]` | Add a file to Gemini's context |
 | `:'<,'>GeminiCodeSend` | Send visual selection to terminal |
