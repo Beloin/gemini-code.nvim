@@ -55,7 +55,9 @@ local function build_cmd(args)
   for k, v in pairs(env) do
     env_prefix = env_prefix .. k .. "=" .. v .. " "
   end
-  local cmd = config.terminal_cmd or "gemini"
+  -- Always pass --ide so Gemini CLI activates IDE companion mode and connects
+  -- back to the MCP server we started.
+  local cmd = (config.terminal_cmd or "gemini") .. " --ide"
   if args and args ~= "" then
     cmd = cmd .. " " .. args
   end
