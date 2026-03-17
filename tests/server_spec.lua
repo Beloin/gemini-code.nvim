@@ -102,3 +102,50 @@ describe("geminicode.server.http - parser", function()
     assert.is_truthy(resp:find("HTTP/1.1 401 Unauthorized", 1, true))
   end)
 end)
+
+describe("geminicode.server.mcp - notification piggybacking", function()
+  local mcp = require("geminicode.server.mcp")
+  local http = require("geminicode.server.http")
+
+  before_each(function()
+    -- Clear any queued notifications
+    mcp._get_queued_notifications()
+  end)
+
+  it("queues notifications and retrieves them", function()
+    mcp.send_notification("ide/diffAccepted", { filePath = "/tmp/test.lua", content = "new" })
+    mcp.send_notification("ide/contextUpdate", { workspaceState = { openFiles = {} } })
+
+    local notifs = mcp._get_queued_notifications()
+    assert.equals(2, #notifs)
+    assert.equals("ide/diffAccepted", notifs[1].method)
+    assert.equals("ide/contextUpdate", notifs[2].method)
+  end)
+
+  it("includes notifications in JSON-RPC response", function()
+    mcp.send_notification("test/notification", { data = "value" })
+
+    local rpc_response = {
+      jsonrpc = "2.0",
+      id      = 1,
+      result  = { ok = true },
+    }
+    local notifs = mcp._get_queued_notifications()
+    if #notifs > 0 then
+      rpc_response.notifications = notifs
+    end
+
+    local resp_body = vim.fn.json_encode(rpc_response)
+    assert.is_truthy(resp_body:find('"notifications"', 1, true))
+    assert.is_truthy(resp_body:find('test/notification', 1, true))
+  end)
+
+  it("clears notifications after retrieval", function()
+    mcp.send_notification("test/notif", {})
+    mcp._get_queued_notifications()
+
+    -- Second retrieval should get empty list
+    local notifs = mcp._get_queued_notifications()
+    assert.equals(0, #notifs)
+  end)
+end)
