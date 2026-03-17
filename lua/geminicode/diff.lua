@@ -32,16 +32,20 @@ end
 -- @return table { row, col_left, col_right, w_left, w_right, height }
 local function float_geometry()
   local total_w = vim.o.columns
-  local total_h = math.max(10, vim.o.lines - vim.o.cmdheight - 4)
-  local w_left  = math.floor((total_w - 3) / 2)
-  local w_right = total_w - w_left - 3
+  local total_h = vim.o.lines - vim.o.cmdheight
+  local win_w   = math.floor(total_w * 0.7)
+  local win_h   = math.max(10, math.floor(total_h * 0.7))
+  local col_off = math.floor((total_w - win_w) / 2)
+  local row_off = math.floor((total_h - win_h) / 2)
+  local w_left  = math.floor((win_w - 3) / 2)
+  local w_right = win_w - w_left - 3
   return {
-    row     = 1,
-    col_l   = 0,
-    col_r   = w_left + 3,
+    row     = row_off,
+    col_l   = col_off,
+    col_r   = col_off + w_left + 3,
     w_left  = w_left,
     w_right = w_right,
-    height  = total_h,
+    height  = win_h,
   }
 end
 
