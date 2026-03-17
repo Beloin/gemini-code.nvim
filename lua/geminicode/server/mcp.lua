@@ -32,11 +32,8 @@ local tools = {}
 
 --- Pending outbound notifications (to be sent to CLI)
 -- Each entry: { method, params }
+-- Notifications are piggybacked in the response to the next request.
 local notification_queue = {}
-
---- Reference to the most-recently active CLI client (uv_tcp_t)
--- Used to push notifications between requests.
-local active_client = nil
 
 --- Register an MCP tool.
 -- @param name string  Tool name (e.g. "openDiff")
@@ -48,34 +45,30 @@ function M.register_tool(name, schema, handler)
 end
 
 --- Enqueue an outbound notification to the CLI.
--- The notification will be sent with the next available client connection.
+-- The notification will be piggybacked in the response to the next request.
 -- @param method string  e.g. "ide/diffAccepted"
 -- @param params table
 function M.send_notification(method, params)
   table.insert(notification_queue, { method = method, params = params })
   log.debug("MCP notification queued:", method)
-
-  -- If we have an active client connection from a recent request, send immediately
-  if active_client and not active_client:is_closing() then
-    M._flush_notifications(active_client)
-  end
 end
 
---- Flush pending notifications over a client socket.
--- Each notification is sent as a separate HTTP POST body.
--- @param client uv_tcp_t
-function M._flush_notifications(client)
+--- Retrieve and clear pending notifications.
+-- Returns them as JSON-RPC notification objects.
+-- Used by handle_request to piggyback notifications in the response.
+-- @return table  Array of notification objects { jsonrpc, method, params }
+function M._get_queued_notifications()
+  local notifs = {}
   while #notification_queue > 0 do
     local notif = table.remove(notification_queue, 1)
-    local payload = vim.fn.json_encode({
+    table.insert(notifs, {
       jsonrpc = "2.0",
       method  = notif.method,
       params  = notif.params,
     })
-    local response = http.response(200, payload, "application/json")
-    tcp.write(client, response)
-    log.debug("MCP notification sent:", notif.method)
+    log.debug("MCP notification dequeued for response:", notif.method)
   end
+  return notifs
 end
 
 --- Handle an `initialize` request.
@@ -145,9 +138,6 @@ local dispatch = {
 -- @param request table    Parsed HTTP request from http.lua
 -- @return string          Full HTTP response bytes to send back
 function M.handle_request(client, request)
-  -- Update active client reference for outbound notifications
-  active_client = client
-
   -- Route check
   if request.path ~= "/mcp" then
     return http.json_response(404, { error = "Not found" })
@@ -210,6 +200,12 @@ function M.handle_request(client, request)
       id      = id,
       result  = result,
     }
+  end
+
+  -- Piggyback any queued notifications in the response
+  local notifications = M._get_queued_notifications()
+  if #notifications > 0 then
+    rpc_response.notifications = notifications
   end
 
   return http.json_response(200, rpc_response)

@@ -122,7 +122,6 @@ function M.open(file_path, new_content)
       once     = true,
       callback = function()
         accept_diff()
-        return true  -- suppress the "no write" error
       end,
     })
 

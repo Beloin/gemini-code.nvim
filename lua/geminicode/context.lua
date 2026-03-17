@@ -239,7 +239,7 @@ function M.start(opts)
   -- Mode changes — capture selection when leaving visual mode
   vim.api.nvim_create_autocmd("ModeChanged", {
     group   = augroup_id,
-    pattern = "[vVsS\x16\x13]*:*",   -- leaving any visual/select mode
+    pattern = "[vVsS\x16\x13]:.*",   -- leaving any visual/select mode (old:new format)
     callback = function(ev)
       -- Capture the selection just before leaving visual mode
       local prev_mode = ev.match:match("^([^:]*)")
