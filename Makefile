@@ -8,7 +8,7 @@ SPECS := \
 	tests/diff_spec.lua \
 	tests/terminal_spec.lua
 
-.PHONY: test test-% integration help
+.PHONY: test test-% test-e2e integration help
 
 ## Run the full test suite
 test:
@@ -18,6 +18,10 @@ test:
 			-c "lua require('plenary.busted').run('$$spec')" \
 			-c "qa!" 2>&1; \
 	done
+
+## Run automated end-to-end tests against a headless Neovim instance
+test-e2e:
+	python3 tests/test_e2e.py
 
 ## Launch the interactive integration demo (opens Neovim with mock CLI)
 integration:
@@ -38,6 +42,7 @@ help:
 	@echo "  make test-context    Run tests/context_spec.lua"
 	@echo "  make test-discovery  Run tests/discovery_spec.lua"
 	@echo "  make test-diff       Run tests/diff_spec.lua"
+	@echo "  make test-e2e        Automated E2E tests (headless Neovim)"
 	@echo "  make integration     Launch interactive integration demo"
 	@echo ""
 	@echo "Overrides:"
