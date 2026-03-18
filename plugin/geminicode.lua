@@ -33,6 +33,13 @@ end, {
   desc = "Toggle Gemini CLI with auto-edit mode (skips diff approval)",
 })
 
+--- Resume the last Gemini CLI session (--resume)
+vim.api.nvim_create_user_command("GeminiCodeResume", function()
+  require("geminicode").toggle_terminal_resume()
+end, {
+  desc = "Resume last Gemini CLI session",
+})
+
 --- Smart focus: open if not running, focus if open but not active, hide if active
 vim.api.nvim_create_user_command("GeminiCodeFocus", function()
   require("geminicode").focus_terminal()

@@ -48,6 +48,7 @@ return {
   keys = {
     { "<leader>gg", "<cmd>GeminiCode<cr>",         desc = "Toggle Gemini CLI" },
     { "<leader>ga", "<cmd>GeminiCodeAutoEdit<cr>", desc = "Toggle Gemini CLI (auto-edit)" },
+    { "<leader>agr", "<cmd>GeminiCodeResume<cr>",  desc = "Resume last Gemini session" },
     { "<leader>gf", "<cmd>GeminiCodeFocus<cr>",    desc = "Focus Gemini CLI" },
     { "<leader>da", "<cmd>GeminiCodeDiffAccept<cr>", desc = "Accept Gemini diff" },
     { "<leader>dr", "<cmd>GeminiCodeDiffDeny<cr>",   desc = "Reject Gemini diff" },
@@ -132,6 +133,7 @@ require("geminicode").setup({
 |---|---|
 | `:GeminiCode` | Toggle the Gemini CLI terminal |
 | `:GeminiCodeAutoEdit` | Toggle Gemini CLI with `--approval-mode=auto_edit` (skips diff approval) |
+| `:GeminiCodeResume` | Resume the last Gemini CLI session (`--resume`) |
 | `:GeminiCodeFocus` | Focus (or open) the terminal |
 | `:GeminiCodeAdd [path]` | Add a file to Gemini's context |
 | `:'<,'>GeminiCodeSend` | Send visual selection to terminal |
