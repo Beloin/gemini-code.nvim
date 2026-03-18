@@ -184,6 +184,7 @@ describe("geminicode.terminal", function()
       local cmd = terminal_cmd_call()
       assert.is_not_nil(cmd)
       assert.is_falsy(cmd:find("--approval-mode", 1, true))
+      assert.is_falsy(cmd:find("--resume", 1, true))
     end)
   end)
 
@@ -232,6 +233,23 @@ describe("geminicode.terminal", function()
       assert.is_not_nil(default_cmd)
       assert.is_not_nil(auto_cmd)
       assert.not_equals(default_cmd, auto_cmd)
+    end)
+  end)
+
+  -- ── Tests: --resume mode ──────────────────────────────────────────────────
+  describe("--resume", function()
+    it("appends the flag when toggle() receives it", function()
+      terminal.toggle("--resume")
+      local cmd = terminal_cmd_call()
+      assert.is_not_nil(cmd)
+      assert.is_truthy(cmd:find("--resume", 1, true))
+    end)
+
+    it("still includes the port env var with resume", function()
+      terminal.toggle("--resume")
+      local cmd = terminal_cmd_call()
+      assert.is_not_nil(cmd)
+      assert.is_truthy(cmd:find("GEMINI_CLI_IDE_SERVER_PORT=12345", 1, true))
     end)
   end)
 
@@ -343,6 +361,15 @@ describe("geminicode.terminal", function()
       local api = load_init_with_mock_terminal(mock_term)
       api.toggle_terminal_auto_edit()
       assert.equals("--approval-mode=auto_edit", captured)
+    end)
+
+    it("toggle_terminal_resume() calls terminal.toggle('--resume')", function()
+      local captured = "SENTINEL"
+      local mock_term = { toggle = function(args) captured = args end, setup = function() end }
+
+      local api = load_init_with_mock_terminal(mock_term)
+      api.toggle_terminal_resume()
+      assert.equals("--resume", captured)
     end)
   end)
 end)

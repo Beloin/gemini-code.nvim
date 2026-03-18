@@ -107,6 +107,12 @@ function M.toggle_terminal_auto_edit()
   require("geminicode.terminal").toggle("--approval-mode=auto_edit")
 end
 
+--- Toggle the Gemini CLI terminal in resume mode.
+-- Passes --resume to the CLI to resume the last conversation.
+function M.toggle_terminal_resume()
+  require("geminicode.terminal").toggle("--resume")
+end
+
 --- Focus (or open) the Gemini CLI terminal.
 function M.focus_terminal()
   require("geminicode.terminal").focus()
