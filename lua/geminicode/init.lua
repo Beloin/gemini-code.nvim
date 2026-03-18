@@ -45,6 +45,9 @@ function M.setup(user_config)
   vim.keymap.set("v", "<leader>ags", ":<C-u>GeminiCodeSend<CR>", {
     desc = "Send file reference for selection to Gemini",
   })
+  vim.keymap.set("n", "<leader>agb", "<cmd>GeminiCodeSendBuffer<CR>", {
+    desc = "Send file reference for current buffer to Gemini",
+  })
 end
 
 --- Start the MCP HTTP server and create the discovery file.
@@ -150,6 +153,25 @@ function M.send_selection()
   else
     ref = "@" .. rel_path .. "#L" .. start_line .. "-" .. end_line
   end
+
+  terminal.focus()
+  terminal.send(ref .. " ")
+end
+
+--- Send a file reference for the current buffer to the Gemini terminal.
+--- Sends @file (Gemini CLI syntax) so the CLI can read the whole file.
+function M.send_buffer()
+  local log      = require("geminicode.log")
+  local terminal = require("geminicode.terminal")
+
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if bufname == "" then
+    log.warn("Cannot send buffer: buffer has no file")
+    return
+  end
+
+  local rel_path = vim.fn.fnamemodify(bufname, ":.")
+  local ref = "@" .. rel_path
 
   terminal.focus()
   terminal.send(ref .. " ")
