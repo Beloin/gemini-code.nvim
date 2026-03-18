@@ -6,7 +6,8 @@ SPECS := \
 	tests/discovery_spec.lua \
 	tests/context_spec.lua \
 	tests/diff_spec.lua \
-	tests/terminal_spec.lua
+	tests/terminal_spec.lua \
+	tests/send_selection_spec.lua
 
 .PHONY: test test-% test-e2e integration help
 
