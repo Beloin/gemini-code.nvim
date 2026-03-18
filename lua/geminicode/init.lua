@@ -40,6 +40,11 @@ function M.setup(user_config)
   if opts.auto_start then
     M.start()
   end
+
+  -- 6. Register default keymaps
+  vim.keymap.set("v", "<leader>ags", ":<C-u>GeminiCodeSend<CR>", {
+    desc = "Send file reference for selection to Gemini",
+  })
 end
 
 --- Start the MCP HTTP server and create the discovery file.
@@ -119,20 +124,35 @@ function M.add_file(path)
   require("geminicode.context").add_file(path)
 end
 
---- Send the current visual selection to the Gemini terminal as context.
+--- Send a file reference for the current visual selection to the Gemini terminal.
+--- Sends @file#Lstart-end (Gemini CLI syntax) so the CLI resolves the content.
 function M.send_selection()
-  -- Get selected text
-  local start_pos = vim.fn.getpos("'<")
-  local end_pos   = vim.fn.getpos("'>")
-  local lines     = vim.api.nvim_buf_get_lines(
-    0, start_pos[2] - 1, end_pos[2], false
-  )
-  if #lines == 0 then
-    require("geminicode.log").warn("No selection to send")
+  local log      = require("geminicode.log")
+  local terminal = require("geminicode.terminal")
+
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if bufname == "" then
+    log.warn("Cannot send selection: buffer has no file")
     return
   end
-  local text = table.concat(lines, "\n")
-  require("geminicode.terminal").send(text .. "\n")
+
+  local start_line = vim.fn.getpos("'<")[2]
+  local end_line   = vim.fn.getpos("'>")[2]
+  if start_line == 0 or end_line == 0 then
+    log.warn("No selection to send")
+    return
+  end
+
+  local rel_path = vim.fn.fnamemodify(bufname, ":.")
+  local ref
+  if start_line == end_line then
+    ref = "@" .. rel_path .. "#L" .. start_line
+  else
+    ref = "@" .. rel_path .. "#L" .. start_line .. "-" .. end_line
+  end
+
+  terminal.focus()
+  terminal.send(ref .. " ")
 end
 
 --- Accept the active diff in the current buffer.

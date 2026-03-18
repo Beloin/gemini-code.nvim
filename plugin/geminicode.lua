@@ -56,7 +56,7 @@ vim.api.nvim_create_user_command("GeminiCodeSend", function()
   require("geminicode").send_selection()
 end, {
   range = true,
-  desc = "Send visual selection to Gemini terminal",
+  desc = "Send file reference for selection to Gemini terminal",
 })
 
 --- Accept the currently proposed diff
