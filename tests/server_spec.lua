@@ -103,6 +103,62 @@ describe("geminicode.server.http - parser", function()
   end)
 end)
 
+describe("geminicode.server.mcp - handle_request response shape", function()
+  local mcp  = require("geminicode.server.mcp")
+  local auth = require("geminicode.server.auth")
+
+  before_each(function()
+    auth.reset()
+    auth.init()
+    -- Clear any stale queued notifications
+    mcp._get_queued_notifications()
+  end)
+
+  after_each(function()
+    auth.reset()
+  end)
+
+  it("response does NOT contain a non-standard 'notifications' field", function()
+    -- Queue a notification; it must be drained but NOT leaked into the response
+    mcp.send_notification("ide/contextUpdate", { workspaceState = {} })
+
+    local body = vim.fn.json_encode({
+      jsonrpc = "2.0",
+      method  = "initialize",
+      id      = 1,
+    })
+    local request = {
+      method  = "POST",
+      path    = "/mcp",
+      headers = { authorization = "Bearer " .. auth.get_token() },
+      body    = body,
+    }
+
+    local raw_response = mcp.handle_request(nil, request)
+    assert.is_truthy(raw_response:find("HTTP/1.1 200 OK", 1, true))
+    assert.is_falsy(raw_response:find('"notifications"', 1, true))
+  end)
+
+  it("valid initialize response contains jsonrpc and result fields", function()
+    local body = vim.fn.json_encode({
+      jsonrpc = "2.0",
+      method  = "initialize",
+      id      = 1,
+    })
+    local request = {
+      method  = "POST",
+      path    = "/mcp",
+      headers = { authorization = "Bearer " .. auth.get_token() },
+      body    = body,
+    }
+
+    local raw_response = mcp.handle_request(nil, request)
+    assert.is_truthy(raw_response:find('"jsonrpc"', 1, true))
+    assert.is_truthy(raw_response:find('"result"', 1, true))
+    assert.is_falsy(raw_response:find('"error"', 1, true))
+  end)
+end)
+
 describe("geminicode.server.mcp - notification piggybacking", function()
   local mcp = require("geminicode.server.mcp")
   local http = require("geminicode.server.http")

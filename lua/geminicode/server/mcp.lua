@@ -187,6 +187,12 @@ function M.handle_request(client, request)
 
   local result, err = handler(rpc)
 
+  -- Drain any queued notifications (they are dropped for plain HTTP responses;
+  -- the Streamable HTTP transport does not allow extra fields in a JSON-RPC
+  -- response and the MCP SDK will reject the message with a Zod error if we
+  -- add a non-standard "notifications" key).
+  M._get_queued_notifications()
+
   local rpc_response
   if err then
     rpc_response = {
@@ -200,12 +206,6 @@ function M.handle_request(client, request)
       id      = id,
       result  = result,
     }
-  end
-
-  -- Piggyback any queued notifications in the response
-  local notifications = M._get_queued_notifications()
-  if #notifications > 0 then
-    rpc_response.notifications = notifications
   end
 
   return http.json_response(200, rpc_response)
