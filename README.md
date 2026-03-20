@@ -9,6 +9,9 @@ Google's official [IDE Companion Spec](https://geminicli.com/docs/ide-integratio
 > against Gemini CLI.
 
 ---
+<img width="1920" height="1058" alt="image" src="https://github.com/user-attachments/assets/26502c81-a6b1-404d-82a0-264ebe08a2d0" />
+---
+
 
 ## Features
 
